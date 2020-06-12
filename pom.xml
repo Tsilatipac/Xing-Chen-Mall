@@ -14,5 +14,9 @@
         <module>xingchenmall-order</module>
         <module>xingchenmall-product</module>
         <module>xingchenmall-ware</module>
+        <module>renren-fast</module>
+        <module>renren-generator</module>
+        <module>xingchenmall-common</module>
+        <module>xingchenmall-gateway</module>
     </modules>
 </project>
