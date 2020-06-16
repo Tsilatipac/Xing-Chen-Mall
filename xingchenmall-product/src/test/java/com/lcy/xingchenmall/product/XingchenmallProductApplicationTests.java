@@ -1,6 +1,9 @@
 package com.lcy.xingchenmall.product;
 
+import com.lcy.xingchenmall.product.dao.AttrGroupDao;
+import com.lcy.xingchenmall.product.dao.SkuSaleAttrValueDao;
 import com.lcy.xingchenmall.product.service.CategoryService;
+import com.lcy.xingchenmall.product.vo.SkuItemSaleAttrVo;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.redisson.api.RedissonClient;
@@ -10,6 +13,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -24,6 +28,20 @@ class XingchenmallProductApplicationTests {
 
     @Autowired
     RedissonClient redissonClient;
+
+    @Autowired
+    AttrGroupDao attrGroupDao;
+
+    @Autowired
+    SkuSaleAttrValueDao skuSaleAttrValueDao;
+
+    @Test
+    public void test(){
+//        List<SpuItemAttrGroupVo> attrGroupWithAttrsBySpuId = attrGroupDao.getAttrGroupWithAttrsBySpuId(100L, 225L);
+//        System.out.println(attrGroupWithAttrsBySpuId);
+        List<SkuItemSaleAttrVo> saleAttrsBySpuId = skuSaleAttrValueDao.getSaleAttrsBySpuId(3L);
+        System.out.println(saleAttrsBySpuId);
+    }
 
     @Test
     public void redisson(){

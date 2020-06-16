@@ -26,6 +26,16 @@ public class SearchResult {
 
     //以上是返回给页面的所有信息
 
+    //面包屑导航数据
+    private List<NavVo> navs;
+
+    @Data
+    public static class NavVo{
+        private String navName;
+        private String navValue;
+        private String Link;
+    }
+
     @Data
     public static class BrandVo {
         private Long brandId;

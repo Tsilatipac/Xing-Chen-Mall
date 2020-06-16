@@ -1,10 +1,14 @@
 package com.lcy.xingchenmall.search.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.lcy.common.to.es.SkuEsModel;
+import com.lcy.common.utils.R;
 import com.lcy.xingchenmall.search.config.XingchenmallElasticConfig;
 import com.lcy.xingchenmall.search.constant.EsConstant;
+import com.lcy.xingchenmall.search.feign.ProductFeignService;
 import com.lcy.xingchenmall.search.service.MallSearchService;
+import com.lcy.xingchenmall.search.vo.AttrResponseVo;
 import com.lcy.xingchenmall.search.vo.SearchParam;
 import com.lcy.xingchenmall.search.vo.SearchResult;
 import org.apache.lucene.search.join.ScoreMode;
@@ -33,6 +37,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,6 +48,9 @@ public class MallSearchServiceImpl implements MallSearchService {
 
     @Autowired
     RestHighLevelClient client;
+
+    @Autowired
+    ProductFeignService productFeignService;
 
     /**
      * Spirng MVC特性：自动将页面提交过来的所有请求参数封装成指定的对象
@@ -291,6 +300,39 @@ public class MallSearchServiceImpl implements MallSearchService {
             pageNavs.add(i);
         }
         result.setPageNavs(pageNavs);
+
+        //6、构建面包屑导航功能
+        if(param.getAttrs()!=null&&param.getAttrs().size()>0) {
+
+            List<SearchResult.NavVo> collect = param.getAttrs().stream().map(attr -> {
+                //1、分析每个attr传过来的查询参数值
+                SearchResult.NavVo navVo = new SearchResult.NavVo();
+                String[] s = attr.split("_");
+                navVo.setNavName(s[1]);
+                R r = productFeignService.attrInfo(Long.parseLong(s[0]));
+                if(r.getCode()==0){
+                    AttrResponseVo data = r.getData("attr", new TypeReference<AttrResponseVo>() {
+                    });
+                    navVo.setNavName(data.getAttrName());
+                }else {
+                    navVo.setNavName(s[0]);
+                }
+                //取消了这个面包屑以后，我们要跳转到那个地方，将请求地址的url里面的当前置空
+                //拿到所有的查询条件，去掉当前
+                String encode = null;
+                try {
+                    encode = URLEncoder.encode(attr, "UTF-8");
+                    encode = encode.replace("+","%20");//浏览器对空格的编码和java不一样
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                String replace = param.get_queryString().replace("&attrs=" + encode, "");
+                navVo.setLink("http://search.xingchenmall.com/list.html?"+replace);
+                return navVo;
+            }).collect(Collectors.toList());
+            result.setNavs(collect);
+        }
+
         return result;
     }
 }

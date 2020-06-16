@@ -3,9 +3,11 @@ package com.lcy.xingchenmall.product.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.lcy.common.utils.PageUtils;
 import com.lcy.xingchenmall.product.entity.SkuInfoEntity;
+import com.lcy.xingchenmall.product.vo.SkuItemVo;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 /**
  * skuÐÅÏ¢
@@ -24,5 +26,7 @@ public interface SkuInfoService extends IService<SkuInfoEntity> {
 
 
     List<SkuInfoEntity> getSkuBySpuId(Long spuId);
+
+    SkuItemVo item(Long skuId) throws ExecutionException, InterruptedException;
 }
 

@@ -64,11 +64,16 @@ spring:
         - id: xingchenmall_host_route
           uri: lb://xingchenmall-product
           predicates:
-            - Host=xingchenmall.com
+            - Host=xingchenmall.com,item.xingchenmall.com
 
         - id: xingchenmall_search_route
           uri: lb://xingchenmall-search
           predicates:
             - Host=search.xingchenmall.com
+
+        - id: xingchenmall_auth_route
+          uri: lb://xingchenmall-auth-server
+          predicates:
+            - Host=auth.xingchenmall.com
 
 #前端项目，/api
