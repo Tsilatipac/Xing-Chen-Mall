@@ -1,10 +1,15 @@
 package com.lcy.xingchenmall.member.controller;
 
+import com.lcy.common.exception.BizCodeEnume;
 import com.lcy.common.utils.PageUtils;
 import com.lcy.common.utils.R;
 import com.lcy.xingchenmall.member.entity.MemberEntity;
+import com.lcy.xingchenmall.member.exception.PhoneExsitException;
+import com.lcy.xingchenmall.member.exception.UsernameExsitException;
 import com.lcy.xingchenmall.member.feign.CouponFeignService;
 import com.lcy.xingchenmall.member.service.MemberService;
+import com.lcy.xingchenmall.member.vo.MemberLoginVo;
+import com.lcy.xingchenmall.member.vo.MemberRegistVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,7 +17,6 @@ import java.util.Arrays;
 import java.util.Map;
 
 //import org.apache.shiro.authz.annotation.RequiresPermissions;
-
 
 
 /**
@@ -26,27 +30,48 @@ import java.util.Map;
 @RequestMapping("member/member")
 public class MemberController {
     @Autowired
+    CouponFeignService couponFeignService;
+    @Autowired
     private MemberService memberService;
 
-    @Autowired
-    CouponFeignService couponFeignService;
-
     @RequestMapping("/coupons")
-    public R test(){
+    public R test() {
         MemberEntity memberEntity = new MemberEntity();
         memberEntity.setNickname("张三");
 
         R membercoupons = couponFeignService.membercoupons();
-        return R.ok().put("member",memberEntity).put("coupons",membercoupons.get("coupons"));
+        return R.ok().put("member", memberEntity).put("coupons", membercoupons.get("coupons"));
     }
 
+    @PostMapping("/login")
+    public R login(@RequestBody MemberLoginVo vo) {
+        MemberEntity entity = memberService.login(vo);
+        if (entity != null) {
+            return R.ok();
+        } else {
+            return R.error(BizCodeEnume.LOGINACCT_PASSWORD_INVAILD_EXCEPTION.getCode(),BizCodeEnume.LOGINACCT_PASSWORD_INVAILD_EXCEPTION.getMsg());
+        }
+    }
+
+    @PostMapping("/regist")
+    public R regist(@RequestBody MemberRegistVo vo) {
+
+        try {
+            memberService.regist(vo);
+        } catch (PhoneExsitException e) {
+            return R.error(BizCodeEnume.PHONE_EXSIT_EXCEPTION.getCode(), BizCodeEnume.PHONE_EXSIT_EXCEPTION.getMsg());
+        } catch (UsernameExsitException e) {
+            return R.error(BizCodeEnume.USER_EXSIT_EXCEPTION.getCode(), BizCodeEnume.USER_EXSIT_EXCEPTION.getMsg());
+        }
+        return R.ok();
+    }
 
     /**
      * 列表
      */
     @RequestMapping("/list")
     //@RequiresPermissions("member:member:list")
-    public R list(@RequestParam Map<String, Object> params){
+    public R list(@RequestParam Map<String, Object> params) {
         PageUtils page = memberService.queryPage(params);
 
         return R.ok().put("page", page);
@@ -58,7 +83,7 @@ public class MemberController {
      */
     @RequestMapping("/info/{id}")
     //@RequiresPermissions("member:member:info")
-    public R info(@PathVariable("id") Long id){
+    public R info(@PathVariable("id") Long id) {
         MemberEntity member = memberService.getById(id);
 
         return R.ok().put("member", member);
@@ -69,7 +94,7 @@ public class MemberController {
      */
     @RequestMapping("/save")
     //@RequiresPermissions("member:member:save")
-    public R save(@RequestBody MemberEntity member){
+    public R save(@RequestBody MemberEntity member) {
         memberService.save(member);
 
         return R.ok();
@@ -80,7 +105,7 @@ public class MemberController {
      */
     @RequestMapping("/update")
     //@RequiresPermissions("member:member:update")
-    public R update(@RequestBody MemberEntity member){
+    public R update(@RequestBody MemberEntity member) {
         memberService.updateById(member);
 
         return R.ok();
@@ -91,7 +116,7 @@ public class MemberController {
      */
     @RequestMapping("/delete")
     //@RequiresPermissions("member:member:delete")
-    public R delete(@RequestBody Long[] ids){
+    public R delete(@RequestBody Long[] ids) {
         memberService.removeByIds(Arrays.asList(ids));
 
         return R.ok();
